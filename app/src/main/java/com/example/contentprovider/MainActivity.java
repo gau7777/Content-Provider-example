@@ -2,10 +2,14 @@ package com.example.contentprovider;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Contacts;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.Manifest.permission.READ_PHONE_STATE;
 
 public class MainActivity extends AppCompatActivity {
      private ListView contactnames;
@@ -37,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         contactnames = (ListView) findViewById(R.id.contacts_names);
 
-        int hasReadContactPermission = ContextCompat.checkSelfPermission(this, READ_CONTACTS);
+        int hasReadContactPermission = ContextCompat.checkSelfPermission(this, GET);
         if(hasReadContactPermission == PackageManager.PERMISSION_GRANTED){
             READ_CONTACTS_GRANTED = true;
         }
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                     if(cursor != null){
                         List<String> contacts = new ArrayList<String>();
                         while(cursor.moveToNext()){
-                            contacts.add(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+                            contacts.add(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
                         }
                         cursor.close();
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.contact_detail, R.id.name, contacts);
@@ -73,7 +78,22 @@ public class MainActivity extends AppCompatActivity {
                 else
                 {
                     Snackbar.make(view, "Please grant permission to your contacts", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                            .setAction("Action", new View.OnClickListener(){
+
+                                @Override
+                                public void onClick(View v) {
+                                    if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, READ_CONTACTS)){
+                                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{READ_CONTACTS}, REQUEST_CODE_READ_CONTACTS);
+                                    }
+                                    else{
+                                        Intent intent = new Intent();
+                                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", MainActivity.this.getPackageName(), null);
+                                        intent.setData(uri);
+                                        MainActivity.this.startActivity(intent);
+                                    }
+                                }
+                            }).show();
                 }
             }
         });
