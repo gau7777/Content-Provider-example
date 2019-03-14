@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         contactnames = (ListView) findViewById(R.id.contacts_names);
 
-        int hasReadContactPermission = ContextCompat.checkSelfPermission(this, GET);
+        int hasReadContactPermission = ContextCompat.checkSelfPermission(this, READ_CONTACTS);
         if(hasReadContactPermission == PackageManager.PERMISSION_GRANTED){
             READ_CONTACTS_GRANTED = true;
         }
